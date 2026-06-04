@@ -1,0 +1,264 @@
+<!-- ============================================================
+  employee-form.component.html
+  This form handles BOTH Create and Edit employee.
+  KEY ANGULAR CONCEPTS USED HERE:
+    [(ngModel)]   — Two-way data binding: input ↔ formData field
+    (ngSubmit)    — Calls onSubmit() when form is submitted
+    #empForm      — Template reference variable to access form state
+    *ngIf         — Conditionally show/hide elements
+    [disabled]    — Disable a button based on a condition
+============================================================ -->
+
+<div class="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-6">
+  <div class="max-w-2xl mx-auto">
+
+    <!-- ── Page Header ── -->
+    <div class="mb-8">
+      <!-- Back button -->
+      <button
+        (click)="cancel()"
+        class="flex items-center gap-2 text-slate-500 hover:text-slate-700 mb-4 transition-colors"
+      >
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+        </svg>
+        Back to list
+      </button>
+
+      <!-- Title changes based on isEditMode -->
+      <h1 class="text-3xl font-bold text-slate-800">
+        {{ isEditMode ? 'Edit Employee' : 'Add New Employee' }}
+      </h1>
+      <p class="text-slate-500 mt-1">
+        {{ isEditMode ? 'Update the employee information below' : 'Fill in the details to add a new team member' }}
+      </p>
+    </div>
+
+    <!-- ── Loading Skeleton (edit mode only) ── -->
+    <div *ngIf="loadingEmployee" class="bg-white rounded-2xl p-8 shadow-sm border border-slate-100 text-center">
+      <div class="w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto"></div>
+      <p class="text-slate-400 mt-3">Loading employee data...</p>
+    </div>
+
+    <!-- ── Error Banner ── -->
+    <div *ngIf="error" class="mb-4 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm">
+      {{ error }}
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════
+      THE FORM
+      (ngSubmit)="onSubmit()" — Angular intercepts the form submit
+        event and calls our onSubmit() method instead of default
+        browser behavior (which would cause a page reload).
+      #empForm="ngForm" — Creates a template reference "empForm"
+        pointing to the NgForm directive. Lets us check form.valid.
+    ═══════════════════════════════════════════════════════════ -->
+    <form
+      *ngIf="!loadingEmployee"
+      (ngSubmit)="onSubmit()"
+      #empForm="ngForm"
+      class="bg-white rounded-2xl shadow-sm border border-slate-100 p-8 space-y-6"
+    >
+
+      <!-- ── Row 1: Name & Email ── -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+        <!-- Name Field
+          [(ngModel)]="formData.name" — two-way binding:
+            - When user types → formData.name is updated
+            - When formData.name changes → input value updates
+          name="name" — required by ngModel to track this field
+          required    — HTML + Angular validation: field must not be empty
+          #nameField="ngModel" — template ref to check field validity
+        -->
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-1.5">
+            Full Name <span class="text-red-500">*</span>
+          </label>
+          <input
+            type="text"
+            [(ngModel)]="formData.name"
+            name="name"
+            required
+            #nameField="ngModel"
+            placeholder="e.g. Aarav Sharma"
+            class="w-full px-4 py-2.5 border rounded-xl text-slate-800 placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+            [class.border-red-300]="nameField.invalid && nameField.touched"
+            [class.border-slate-200]="!(nameField.invalid && nameField.touched)"
+          />
+          <!-- Validation error — only shows after user has touched the field -->
+          <p *ngIf="nameField.invalid && nameField.touched" class="mt-1 text-xs text-red-500">
+            Name is required
+          </p>
+        </div>
+
+        <!-- Email Field -->
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-1.5">
+            Email <span class="text-red-500">*</span>
+          </label>
+          <input
+            type="email"
+            [(ngModel)]="formData.email"
+            name="email"
+            required
+            #emailField="ngModel"
+            placeholder="email@company.com"
+            class="w-full px-4 py-2.5 border rounded-xl text-slate-800 placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+            [class.border-red-300]="emailField.invalid && emailField.touched"
+            [class.border-slate-200]="!(emailField.invalid && emailField.touched)"
+          />
+          <p *ngIf="emailField.invalid && emailField.touched" class="mt-1 text-xs text-red-500">
+            Valid email is required
+          </p>
+        </div>
+      </div>
+
+      <!-- ── Row 2: Phone & Salary ── -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-1.5">Phone</label>
+          <input
+            type="tel"
+            [(ngModel)]="formData.phone"
+            name="phone"
+            placeholder="9876543210"
+            class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-slate-800 placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+          />
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-1.5">
+            Salary (₹) <span class="text-red-500">*</span>
+          </label>
+          <input
+            type="number"
+            [(ngModel)]="formData.salary"
+            name="salary"
+            required
+            min="0"
+            #salaryField="ngModel"
+            placeholder="75000"
+            class="w-full px-4 py-2.5 border rounded-xl text-slate-800 placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+            [class.border-red-300]="salaryField.invalid && salaryField.touched"
+            [class.border-slate-200]="!(salaryField.invalid && salaryField.touched)"
+          />
+        </div>
+      </div>
+
+      <!-- ── Row 3: Department & Role ── -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+        <!-- Department Dropdown
+          [(ngModel)]="formData.department" — binds selected option to formData.department
+          *ngFor in the template creates one <option> per department
+        -->
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-1.5">
+            Department <span class="text-red-500">*</span>
+          </label>
+          <select
+            [(ngModel)]="formData.department"
+            name="department"
+            required
+            class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition bg-white"
+          >
+            <!-- *ngFor loops through the departments array from the component -->
+            <option *ngFor="let dept of departments" [value]="dept">{{ dept }}</option>
+          </select>
+        </div>
+
+        <!-- Role Dropdown -->
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-1.5">
+            Role <span class="text-red-500">*</span>
+          </label>
+          <select
+            [(ngModel)]="formData.role"
+            name="role"
+            required
+            class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition bg-white"
+          >
+            <option *ngFor="let role of roles" [value]="role">{{ role }}</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- ── Row 4: Joining Date & Status ── -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-1.5">
+            Joining Date <span class="text-red-500">*</span>
+          </label>
+          <input
+            type="date"
+            [(ngModel)]="formData.joiningDate"
+            name="joiningDate"
+            required
+            #dateField="ngModel"
+            class="w-full px-4 py-2.5 border rounded-xl text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+            [class.border-red-300]="dateField.invalid && dateField.touched"
+            [class.border-slate-200]="!(dateField.invalid && dateField.touched)"
+          />
+        </div>
+
+        <!-- Status Toggle — radio buttons styled as a toggle -->
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-1.5">Status</label>
+          <div class="flex gap-3 mt-1">
+            <!-- Radio inputs bound to formData.status via [(ngModel)] -->
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                [(ngModel)]="formData.status"
+                name="status"
+                value="active"
+                class="accent-emerald-600"
+              />
+              <span class="text-sm text-slate-700">Active</span>
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                [(ngModel)]="formData.status"
+                name="status"
+                value="inactive"
+                class="accent-slate-400"
+              />
+              <span class="text-sm text-slate-700">Inactive</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Form Actions ── -->
+      <div class="flex gap-3 pt-2 border-t border-slate-100">
+        <!-- Cancel Button -->
+        <button
+          type="button"
+          (click)="cancel()"
+          class="px-6 py-2.5 border border-slate-200 text-slate-600 rounded-xl hover:bg-slate-50 font-medium transition-colors"
+        >
+          Cancel
+        </button>
+
+        <!-- Submit Button
+          [disabled] — button is disabled when:
+            1. empForm.invalid — form has validation errors
+            2. submitting — HTTP request is in progress
+          The '!' negates submitting for the text condition
+        -->
+        <button
+          type="submit"
+          [disabled]="empForm.invalid || submitting"
+          class="flex-1 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 disabled:cursor-not-allowed text-white rounded-xl font-semibold transition-colors flex items-center justify-center gap-2"
+        >
+          <!-- Spinner shows while submitting -->
+          <span *ngIf="submitting" class="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin"></span>
+          {{ submitting ? 'Saving...' : (isEditMode ? 'Update Employee' : 'Add Employee') }}
+        </button>
+      </div>
+    </form>
+
+  </div>
+</div>

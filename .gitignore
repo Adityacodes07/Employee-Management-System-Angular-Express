@@ -1,0 +1,12 @@
+client/node_modules
+server/node_modules
+
+client/.angular/
+
+client/dist
+client/build
+
+.env
+.env.local
+
+*.log
